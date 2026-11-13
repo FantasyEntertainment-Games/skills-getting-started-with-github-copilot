@@ -1,225 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Neon Arena — 1v1</title>
-  <style>
-    :root { color-scheme: dark; font-family: Arial, Helvetica, sans-serif; }
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #070a13; color: #eff7ff; }
-    canvas { display: block; }
-    #hud { position: fixed; inset: 18px 20px auto; display: flex; justify-content: space-between; gap: 16px; pointer-events: none; z-index: 2; }
-    .panel { min-width: 220px; padding: 12px 15px; border: 1px solid #5ae6ff55; border-radius: 12px; background: #08111bd9; box-shadow: 0 0 22px #00c8ff18; }
-    .label { display: flex; justify-content: space-between; font-size: 13px; color: #b7c9d9; margin-bottom: 7px; }
-    .bar { width: 200px; height: 11px; background: #182535; border-radius: 9px; overflow: hidden; }
-    .fill { height: 100%; width: 100%; transition: width .15s; background: linear-gradient(90deg, #00d9a6, #a4ffdc); }
-    #enemyFill { background: linear-gradient(90deg, #ff3f77, #ffae68); }
-    #round { text-align: center; color: #a7efff; font-weight: bold; letter-spacing: .13em; font-size: 13px; }
-    #help { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); color: #d3e2ef; font-size: 13px; text-shadow: 0 2px 6px #000; pointer-events: none; z-index: 2; white-space: nowrap; }
-    #crosshair { position: fixed; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%,-50%); pointer-events: none; z-index: 2; }
-    #crosshair:before, #crosshair:after { content: ''; position: absolute; background: #d9fbff; box-shadow: 0 0 7px #00d9ff; }
-    #crosshair:before { width: 2px; height: 18px; left: 8px; top: 0; }
-    #crosshair:after { height: 2px; width: 18px; left: 0; top: 8px; }
-    #overlay { position: fixed; inset: 0; display: grid; place-items: center; z-index: 5; background: #030711bd; }
-    #card { width: min(440px, calc(100vw - 32px)); padding: 30px; text-align: center; border: 1px solid #4ddfff77; border-radius: 18px; background: linear-gradient(145deg, #101c2a, #080d17); box-shadow: 0 0 55px #05c9ff20; }
-    h1 { margin: 0 0 8px; font-size: 34px; letter-spacing: .08em; color: #bff6ff; }
-    #message { color: #b7c9d9; line-height: 1.55; margin: 12px 0 22px; }
-    button { border: 0; border-radius: 9px; padding: 13px 25px; background: linear-gradient(90deg, #00c8d8, #47f0bb); color: #041016; font-size: 15px; font-weight: 800; cursor: pointer; }
-    button:hover { filter: brightness(1.12); }
-    .hidden { display: none !important; }
-    @media (max-width: 600px) { #hud { inset: 10px 9px auto; } .panel { min-width: 0; padding: 9px; } .bar { width: 120px; } #help { font-size: 11px; bottom: 10px; } }
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Neon Arena — 1v1</title>
+<style>
+:root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#070a13;color:#eff7ff}canvas{display:block}#hud{position:fixed;inset:18px 20px auto;display:flex;justify-content:space-between;gap:12px;pointer-events:none;z-index:2}.panel{min-width:190px;padding:11px 14px;border:1px solid #65eaff66;border-radius:12px;background:#08111bd9;box-shadow:0 0 24px #00c8ff20;backdrop-filter:blur(8px)}.label{display:flex;justify-content:space-between;font-size:13px;color:#c1d5e5;margin-bottom:7px}.bar{width:190px;height:10px;background:#182535;border-radius:9px;overflow:hidden}.fill{height:100%;width:100%;transition:width .15s;background:linear-gradient(90deg,#00d9a6,#a4ffdc)}#enemyFill{background:linear-gradient(90deg,#ff3f77,#ffae68)}#round{text-align:center;color:#a7efff;font-weight:bold;letter-spacing:.13em;font-size:13px;min-width:180px}#ammoBox{text-align:center;color:#e3f6ff;font-size:18px;font-weight:bold}#ammoBox small{display:block;color:#9bb2c6;font-size:10px;letter-spacing:.15em;margin-top:3px}#help{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);color:#e1edf7;font-size:12px;text-shadow:0 2px 6px #000;pointer-events:none;z-index:2;white-space:nowrap}#crosshair{position:fixed;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);pointer-events:none;z-index:2}#crosshair:before,#crosshair:after{content:'';position:absolute;background:#d9fbff;box-shadow:0 0 8px #00d9ff}#crosshair:before{width:2px;height:18px;left:8px}#crosshair:after{height:2px;width:18px;top:8px}#overlay{position:fixed;inset:0;display:grid;place-items:center;z-index:5;background:#030711bd}#card{width:min(440px,calc(100vw - 32px));padding:30px;text-align:center;border:1px solid #4ddfff77;border-radius:18px;background:linear-gradient(145deg,#101c2a,#080d17);box-shadow:0 0 55px #05c9ff20}h1{margin:0 0 8px;font-size:34px;letter-spacing:.08em;color:#bff6ff}#message{color:#b7c9d9;line-height:1.55;margin:12px 0 22px}button{border:0;border-radius:9px;padding:13px 25px;background:linear-gradient(90deg,#00c8d8,#47f0bb);color:#041016;font-size:15px;font-weight:800;cursor:pointer}.hidden{display:none!important}@media(max-width:650px){#hud{inset:8px 7px auto;gap:4px}.panel{min-width:0;padding:8px}.bar{width:clamp(70px,22vw,130px)}#round{min-width:95px;font-size:10px}#help{font-size:10px;white-space:normal;text-align:center;width:96%;bottom:8px}}
+</style>
 </head>
 <body>
-  <div id="hud">
-    <div class="panel"><div class="label"><span>YOU</span><span id="playerText">100</span></div><div class="bar"><div id="playerFill" class="fill"></div></div></div>
-    <div class="panel" id="round">1V1 • NEON ARENA</div>
-    <div class="panel"><div class="label"><span>RIVAL</span><span id="enemyText">100</span></div><div class="bar"><div id="enemyFill" class="fill"></div></div></div>
-  </div>
-  <div id="crosshair"></div>
-  <div id="help">WASD move · Mouse aim · Click fire · Shift sprint · Esc pause</div>
-  <div id="overlay"><div id="card"><h1>NEON ARENA</h1><div id="message">A fast 1v1 arena duel. Defeat the rival before they take you down.<br><br>WASD to move · Mouse to aim · Click to fire</div><button id="start">ENTER ARENA</button></div></div>
-
-  <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x080d18);
-    scene.fog = new THREE.Fog(0x080d18, 22, 58);
-    const camera = new THREE.PerspectiveCamera(76, innerWidth / innerHeight, 0.1, 100);
-    camera.rotation.order = 'YXZ';
-    camera.position.set(0, 1.65, 10);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
-    document.body.prepend(renderer.domElement);
-
-    scene.add(new THREE.HemisphereLight(0x9bdcff, 0x171323, 1.8));
-    const keyLight = new THREE.DirectionalLight(0xc9f7ff, 2.4);
-    keyLight.position.set(-5, 12, 7); keyLight.castShadow = true; scene.add(keyLight);
-    function glow(color, intensity, x, y, z, distance = 24) {
-      const light = new THREE.PointLight(color, intensity, distance);
-      light.position.set(x, y, z); scene.add(light);
-    }
-    glow(0x00d9ff, 25, -10, 4, 0); glow(0xff286f, 25, 10, 4, 0);
-
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(34, 34), new THREE.MeshStandardMaterial({ color: 0x172333, roughness: .8, metalness: .25 }));
-    floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
-    const grid = new THREE.GridHelper(34, 34, 0x25bdda, 0x26374a); grid.position.y = .012; scene.add(grid);
-
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x1b2b3c, metalness: .55, roughness: .42 });
-    const trimCyan = new THREE.MeshStandardMaterial({ color: 0x27e4ff, emissive: 0x0799b5, emissiveIntensity: 2.2 });
-    const trimPink = new THREE.MeshStandardMaterial({ color: 0xff397a, emissive: 0x9a123d, emissiveIntensity: 1.8 });
-    function box(x, y, z, sx, sy, sz, material, cast = true) {
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), material);
-      mesh.position.set(x, y, z); mesh.castShadow = cast; mesh.receiveShadow = true; scene.add(mesh); return mesh;
-    }
-    // Enclosed arena walls and bright top-edge strips.
-    box(0, 2, -17, 34, 4, 1, wallMat); box(0, 2, 17, 34, 4, 1, wallMat);
-    box(-17, 2, 0, 1, 4, 34, wallMat); box(17, 2, 0, 1, 4, 34, wallMat);
-    box(0, 4.05, -16.45, 33, .08, .08, trimCyan, false); box(0, 4.05, 16.45, 33, .08, .08, trimPink, false);
-    box(-16.45, 4.05, 0, .08, .08, 33, trimCyan, false); box(16.45, 4.05, 0, .08, .08, 33, trimPink, false);
-    // Cover blocks that both fighters can use.
-    const cover = [];
-    [[-6, -4, 3.2, 1.8, 2.2], [6, 4, 3.2, 1.8, 2.2], [-6, 5, 2, 2.5, 1.5], [6, -5, 2, 2.5, 1.5], [0, 0, 2.2, 1.8, 2.2]].forEach(([x,z,sx,sy,sz], i) => {
-      cover.push({ x, z, sx, sz });
-      box(x, sy / 2, z, sx, sy, sz, i % 2 ? trimPink : wallMat);
-    });
-    // Arena floor markings.
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(5.5, .045, 8, 100), trimCyan); ring.rotation.x = Math.PI / 2; ring.position.y = .04; scene.add(ring);
-    const center = new THREE.Mesh(new THREE.CylinderGeometry(.13, .13, .06, 24), trimPink); center.position.y = .04; scene.add(center);
-
-    // Simple first-person weapon model.
-    const weapon = new THREE.Group(); camera.add(weapon); scene.add(camera);
-    const gunMat = new THREE.MeshStandardMaterial({ color: 0x25394b, metalness: .8, roughness: .25 });
-    const gunGlow = new THREE.MeshStandardMaterial({ color: 0x63f5ff, emissive: 0x13b9d1, emissiveIntensity: 2 });
-    const body = new THREE.Mesh(new THREE.BoxGeometry(.22, .18, .55), gunMat); body.position.set(.32, -.27, -.58); weapon.add(body);
-    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.045, .055, .38, 12), gunMat); barrel.rotation.x = Math.PI / 2; barrel.position.set(.32, -.23, -.99); weapon.add(barrel);
-    const sight = new THREE.Mesh(new THREE.BoxGeometry(.08, .035, .12), gunGlow); sight.position.set(.32, -.16, -.68); weapon.add(sight);
-
-    // Rival character made from simple geometric parts.
-    const rival = new THREE.Group();
-    const rivalMat = new THREE.MeshStandardMaterial({ color: 0xd93668, emissive: 0x3e0618, emissiveIntensity: .6, roughness: .45 });
-    const darkMat = new THREE.MeshStandardMaterial({ color: 0x202637, metalness: .35, roughness: .6 });
-    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(.43, .72, 4, 8), rivalMat); torso.position.y = 1.05; torso.castShadow = true; rival.add(torso);
-    const head = new THREE.Mesh(new THREE.SphereGeometry(.29, 16, 12), darkMat); head.position.y = 1.78; head.castShadow = true; rival.add(head);
-    const visor = new THREE.Mesh(new THREE.BoxGeometry(.38, .11, .13), trimPink); visor.position.set(0, 1.8, -.24); rival.add(visor);
-    const legs = new THREE.Mesh(new THREE.BoxGeometry(.52, .45, .34), darkMat); legs.position.y = .35; legs.castShadow = true; rival.add(legs);
-    scene.add(rival);
-
-    const player = { health: 100, x: 0, z: 10, yaw: 0, pitch: 0, speed: 6.4 };
-    const ai = { health: 100, x: 0, z: -10, fireTimer: 1, strafe: 1, strafeTimer: 0 };
-    const keys = {};
-    let playing = false, ended = false, lastShot = 0, hitFlash = 0;
-    const raycaster = new THREE.Raycaster();
-    const clock = new THREE.Clock();
-    const playerFill = document.getElementById('playerFill'), enemyFill = document.getElementById('enemyFill');
-    const overlay = document.getElementById('overlay'), message = document.getElementById('message'), startButton = document.getElementById('start');
-
-    function updateHud() {
-      playerFill.style.width = Math.max(0, player.health) + '%'; enemyFill.style.width = Math.max(0, ai.health) + '%';
-      document.getElementById('playerText').textContent = Math.max(0, Math.ceil(player.health));
-      document.getElementById('enemyText').textContent = Math.max(0, Math.ceil(ai.health));
-    }
-    function showEnd(text) {
-      ended = true; playing = false; document.exitPointerLock?.();
-      message.innerHTML = text + '<br><br>Click below to duel again.'; startButton.textContent = 'PLAY AGAIN'; overlay.classList.remove('hidden');
-    }
-    function startGame() {
-      player.health = ai.health = 100; player.x = 0; player.z = 10; player.yaw = 0; player.pitch = 0;
-      ai.x = 0; ai.z = -10; ai.fireTimer = 1.1; ai.strafeTimer = 0; ai.strafe = 1;
-      camera.position.set(player.x, 1.65, player.z); camera.rotation.set(0, 0, 0); updateHud();
-      ended = false; playing = true; overlay.classList.add('hidden'); renderer.domElement.requestPointerLock?.();
-    }
-    startButton.addEventListener('click', startGame);
-    document.addEventListener('pointerlockchange', () => {
-      if (playing && document.pointerLockElement !== renderer.domElement) {
-        playing = false; overlay.classList.remove('hidden');
-        message.innerHTML = 'Paused. Click below to resume the duel.'; startButton.textContent = 'RESUME';
-      }
-    });
-    document.addEventListener('mousemove', e => {
-      if (!playing) return;
-      player.yaw -= e.movementX * .0022; player.pitch -= e.movementY * .0022;
-      player.pitch = THREE.MathUtils.clamp(player.pitch, -1.15, 1.15);
-      camera.rotation.set(player.pitch, player.yaw, 0);
-    });
-    document.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if ([' ', 'arrowup', 'arrowdown'].includes(e.key.toLowerCase())) e.preventDefault(); });
-    document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
-    document.addEventListener('mousedown', e => { if (e.button === 0 && playing) shoot(); });
-
-    function collides(x, z, radius = .38) {
-      if (Math.abs(x) > 15.8 || Math.abs(z) > 15.8) return true;
-      return cover.some(c => Math.abs(x - c.x) < c.sx / 2 + radius && Math.abs(z - c.z) < c.sz / 2 + radius);
-    }
-    function movePlayer(dt) {
-      let forward = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0);
-      let side = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
-      const length = Math.hypot(forward, side) || 1; forward /= length; side /= length;
-      const speed = player.speed * (keys.shift ? 1.45 : 1);
-      const dx = (-Math.sin(player.yaw) * forward + Math.cos(player.yaw) * side) * speed * dt;
-      const dz = (-Math.cos(player.yaw) * forward - Math.sin(player.yaw) * side) * speed * dt;
-      if (!collides(player.x + dx, player.z)) player.x += dx;
-      if (!collides(player.x, player.z + dz)) player.z += dz;
-      camera.position.set(player.x, 1.65, player.z);
-    }
-    function shoot() {
-      const now = performance.now(); if (now - lastShot < 260) return; lastShot = now;
-      weapon.position.z = .08; setTimeout(() => weapon.position.z = 0, 65);
-      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const targets = [torso, head, legs, visor];
-      const hit = raycaster.intersectObjects(targets, false)[0];
-      if (hit && hit.distance < 35 && ai.health > 0) {
-        ai.health -= hit.object === head || hit.object === visor ? 48 : 34;
-        hitFlash = .12; updateHud();
-        if (ai.health <= 0) showEnd('YOU WIN! The rival is down.');
-      }
-    }
-    function updateRival(dt) {
-      if (ai.health <= 0 || player.health <= 0) return;
-      const dx = player.x - ai.x, dz = player.z - ai.z, dist = Math.hypot(dx, dz) || 1;
-      ai.strafeTimer -= dt;
-      if (ai.strafeTimer <= 0) { ai.strafeTimer = 1.4 + Math.random() * 1.5; ai.strafe = Math.random() < .5 ? -1 : 1; }
-      let vx = 0, vz = 0;
-      if (dist > 8) { vx += dx / dist; vz += dz / dist; }
-      else if (dist < 5.2) { vx -= dx / dist; vz -= dz / dist; }
-      vx += (dz / dist) * ai.strafe * .7; vz += (-dx / dist) * ai.strafe * .7;
-      const vl = Math.hypot(vx, vz) || 1;
-      const nx = ai.x + vx / vl * 2.7 * dt, nz = ai.z + vz / vl * 2.7 * dt;
-      if (!collides(nx, ai.z, .5)) ai.x = nx;
-      if (!collides(ai.x, nz, .5)) ai.z = nz;
-      rival.position.set(ai.x, 0, ai.z); rival.rotation.y = Math.atan2(-dx, -dz);
-      ai.fireTimer -= dt;
-      if (ai.fireTimer <= 0) {
-        ai.fireTimer = .85 + Math.random() * .55;
-        // Rival shots are limited by range and cover, giving the player time to dodge.
-        const origin = new THREE.Vector3(ai.x, 1.45, ai.z);
-        const target = new THREE.Vector3(player.x, 1.35, player.z);
-        const direction = target.clone().sub(origin).normalize();
-        raycaster.set(origin, direction);
-        const blockers = scene.children.filter(o => o.isMesh && o !== floor && o !== grid && ![torso, head, visor, legs].includes(o));
-        const obstruction = raycaster.intersectObjects(blockers, false)[0];
-        if (dist < 19 && (!obstruction || obstruction.distance > dist - .8)) {
-          player.health -= dist < 8 ? 12 : 8; hitFlash = .18; updateHud();
-          if (player.health <= 0) showEnd('RIVAL WINS. Try another round!');
-        }
-      }
-    }
-    function animate() {
-      requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), .04);
-      if (playing && !ended) { movePlayer(dt); updateRival(dt); }
-      weapon.position.x = Math.sin(performance.now() * .004) * .004;
-      if (hitFlash > 0) { hitFlash -= dt; document.body.style.filter = hitFlash > 0 ? 'brightness(1.18)' : ''; }
-      renderer.render(scene, camera);
-    }
-    animate();
-    addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-  </script>
-</body>
-</html>
+<div id="hud"><div class="panel"><div class="label"><span>YOU</span><span id="playerText">100</span></div><div class="bar"><div id="playerFill" class="fill"></div></div></div><div class="panel" id="round">1V1 • NEON ARENA</div><div class="panel" id="ammoBox"><span id="ammoText">12 / 60</span><small id="weaponState">RIFLE</small></div><div class="panel"><div class="label"><span>RIVAL</span><span id="enemyText">100</span></div><div class="bar"><div id="enemyFill" class="fill"></div></div></div></div>
+<div id="crosshair"></div><div id="help">WASD move · Mouse aim · Click fire · R reload · T inspect · Shift run · Ctrl/C slide</div>
+<div id="overlay"><div id="card"><h1>NEON ARENA</h1><div id="message">A 3D 1v1 arena duel. Defeat the rival before they take you down.<br><br>WASD move · Mouse aim · Click fire</div><button id="start">ENTER ARENA</button></div></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x080d18);scene.fog=new THREE.Fog(0x080d18,24,58);
+const camera=new THREE.PerspectiveCamera(76,innerWidth/innerHeight,.1,100);camera.rotation.order='YXZ';
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.prepend(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xb9e8ff,0x151323,2.1));const sun=new THREE.DirectionalLight(0xd8f2ff,3.2);sun.position.set(-7,15,9);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-20;sun.shadow.camera.right=20;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;scene.add(sun);
+function glow(color,intensity,x,y,z,distance=26){const l=new THREE.PointLight(color,intensity,distance);l.position.set(x,y,z);scene.add(l)}glow(0x00d9ff,32,-10,4,0);glow(0xff286f,32,10,4,0);glow(0x467aff,12,0,5,-12);
+const floorMat=new THREE.MeshStandardMaterial({color:0x182637,roughness:.48,metalness:.32});
+// A subtle procedural scanline shader adds a soft sci-fi surface treatment while retaining PBR lighting.
+floorMat.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n float scanLine = 0.985 + 0.015 * sin(gl_FragCoord.y * 0.72);\n diffuseColor.rgb *= scanLine;');};
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(34,34),floorMat);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);const grid=new THREE.GridHelper(34,34,0x25bdda,0x26374a);grid.position.y=.012;scene.add(grid);
+const wallMat=new THREE.MeshStandardMaterial({color:0x26384b,metalness:.62,roughness:.3}),cyan=new THREE.MeshStandardMaterial({color:0x27e4ff,emissive:0x0799b5,emissiveIntensity:2.4}),pink=new THREE.MeshStandardMaterial({color:0xff397a,emissive:0x9a123d,emissiveIntensity:2});
+function box(x,y,z,sx,sy,sz,mat,cast=true){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(x,y,z);m.castShadow=cast;m.receiveShadow=true;scene.add(m);return m}
+box(0,2,-17,34,4,1,wallMat);box(0,2,17,34,4,1,wallMat);box(-17,2,0,1,4,34,wallMat);box(17,2,0,1,4,34,wallMat);box(0,4.05,-16.45,33,.08,.08,cyan,false);box(0,4.05,16.45,33,.08,.08,pink,false);box(-16.45,4.05,0,.08,.08,33,cyan,false);box(16.45,4.05,0,.08,.08,33,pink,false);
+const cover=[];[[-6,-4,3.2,1.8,2.2],[6,4,3.2,1.8,2.2],[-6,5,2,2.5,1.5],[6,-5,2,2.5,1.5],[0,0,2.2,1.8,2.2]].forEach(([x,z,sx,sy,sz],i)=>{cover.push({x,z,sx,sz});box(x,sy/2,z,sx,sy,sz,i%2?pink:wallMat)});
+const ring=new THREE.Mesh(new THREE.TorusGeometry(5.5,.045,8,100),cyan);ring.rotation.x=Math.PI/2;ring.position.y=.04;scene.add(ring);const center=new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,.06,24),pink);center.position.y=.04;scene.add(center);
+// Detailed low-poly first-person rifle with stock, receiver, barrel, sights, grip, magazine, rails and moving bolt.
+const weapon=new THREE.Group();camera.add(weapon);scene.add(camera);
+const gunMetal=new THREE.MeshStandardMaterial({color:0x273342,metalness:.88,roughness:.24}),polymer=new THREE.MeshStandardMaterial({color:0x111923,metalness:.28,roughness:.48}),gunGlow=new THREE.MeshStandardMaterial({color:0x63f5ff,emissive:0x13b9d1,emissiveIntensity:1.8});
+function gunPart(geo,mat,pos,rot){const m=new THREE.Mesh(geo,mat);m.position.set(...pos);if(rot)m.rotation.set(...rot);m.castShadow=true;weapon.add(m);return m}
+gunPart(new THREE.BoxGeometry(.22,.19,.53),gunMetal,[.32,-.27,-.58]);gunPart(new THREE.BoxGeometry(.17,.13,.3),polymer,[.32,-.28,-.25]);gunPart(new THREE.CylinderGeometry(.045,.055,.52,12),gunMetal,[.32,-.23,-1.02],[Math.PI/2,0,0]);gunPart(new THREE.CylinderGeometry(.075,.075,.08,12),gunGlow,[.32,-.23,-1.29],[Math.PI/2,0,0]);gunPart(new THREE.BoxGeometry(.10,.24,.15),polymer,[.32,-.47,-.48],[.2,0,0]);gunPart(new THREE.BoxGeometry(.12,.23,.09),polymer,[.32,-.18,-.34]);gunPart(new THREE.BoxGeometry(.075,.045,.20),gunGlow,[.32,-.15,-.67]);
+const magazine=gunPart(new THREE.BoxGeometry(.13,.27,.15),polymer,[.32,-.49,-.65],[.14,0,0]);const bolt=gunPart(new THREE.BoxGeometry(.12,.045,.24),gunMetal,[.32,-.15,-.49]);const muzzleFlash=new THREE.Mesh(new THREE.SphereGeometry(.09,8,8),new THREE.MeshBasicMaterial({color:0xbfffff}));muzzleFlash.position.set(.32,-.23,-1.34);muzzleFlash.visible=false;weapon.add(muzzleFlash);
+// Human-proportioned rival with articulated limbs, layered gear, hands, boots, helmet and visor.
+const rival=new THREE.Group(),bodyRig=new THREE.Group();rival.add(bodyRig);
+const suit=new THREE.MeshStandardMaterial({color:0x44566b,roughness:.72}),armor=new THREE.MeshStandardMaterial({color:0x29374a,metalness:.35,roughness:.4}),skin=new THREE.MeshStandardMaterial({color:0xb9856d,roughness:.86}),gearPink=new THREE.MeshStandardMaterial({color:0xc52c5e,emissive:0x310817,emissiveIntensity:.3,roughness:.42});
+function humanMesh(parent,geo,mat,pos){const m=new THREE.Mesh(geo,mat);m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+const torso=humanMesh(bodyRig,new THREE.CapsuleGeometry(.34,.62,5,10),suit,[0,1.12,0]);humanMesh(bodyRig,new THREE.BoxGeometry(.52,.44,.28),armor,[0,1.2,-.08]);humanMesh(bodyRig,new THREE.SphereGeometry(.235,20,16),skin,[0,1.82,0]);humanMesh(bodyRig,new THREE.SphereGeometry(.26,16,12),armor,[0,1.97,.015]);const face=humanMesh(bodyRig,new THREE.BoxGeometry(.25,.07,.045),pink,[0,1.81,-.225]);
+const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.42,1.43,0);rightArm.position.set(.42,1.43,0);bodyRig.add(leftArm,rightArm);
+humanMesh(leftArm,new THREE.CapsuleGeometry(.115,.43,4,8),suit,[0,-.25,-.08]);humanMesh(leftArm,new THREE.SphereGeometry(.12,12,10),skin,[0,-.52,-.13]);humanMesh(rightArm,new THREE.CapsuleGeometry(.115,.43,4,8),suit,[0,-.25,-.08]);humanMesh(rightArm,new THREE.SphereGeometry(.12,12,10),skin,[0,-.52,-.13]);
+const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.18,.73,0);rightLeg.position.set(.18,.73,0);bodyRig.add(leftLeg,rightLeg);for(const leg of [leftLeg,rightLeg]){humanMesh(leg,new THREE.CapsuleGeometry(.14,.46,4,8),suit,[0,-.25,0]);humanMesh(leg,new THREE.BoxGeometry(.25,.14,.4),polymer,[0,-.52,-.07]);}
+humanMesh(bodyRig,new THREE.BoxGeometry(.54,.18,.31),gearPink,[0,1.55,.08]);scene.add(rival);
+const player={health:100,x:0,z:10,yaw:0,pitch:0,speed:6.4,ammo:12,reserve:60,runTime:0,slideTime:0,slideCooldown:0};const ai={health:100,x:0,z:-10,fireTimer:1.1,strafe:1,strafeTimer:0};const keys={};let playing=false,ended=false,lastShot=0,hitFlash=0,reloading=false,reloadStart=0,inspectStart=0,inspecting=false;const raycaster=new THREE.Raycaster(),clock=new THREE.Clock();
+const playerFill=document.getElementById('playerFill'),enemyFill=document.getElementById('enemyFill'),overlay=document.getElementById('overlay'),message=document.getElementById('message'),startButton=document.getElementById('start'),weaponState=document.getElementById('weaponState');
+function updateHud(){playerFill.style.width=Math.max(0,player.health)+'%';enemyFill.style.width=Math.max(0,ai.health)+'%';document.getElementById('playerText').textContent=Math.max(0,Math.ceil(player.health));document.getElementById('enemyText').textContent=Math.max(0,Math.ceil(ai.health));document.getElementById('ammoText').textContent=`${player.ammo} / ${player.reserve}`;weaponState.textContent=reloading?'RELOADING':inspecting?'INSPECTING':player.slideTime>0?'SLIDING':keys.shift?'SPRINTING':'RIFLE'}
+function showEnd(text){ended=true;playing=false;document.exitPointerLock?.();message.innerHTML=text+'<br><br>Click below to duel again.';startButton.textContent='PLAY AGAIN';overlay.classList.remove('hidden')}
+function startGame(){player.health=ai.health=100;player.x=0;player.z=10;player.yaw=player.pitch=0;player.ammo=12;player.reserve=60;player.slideTime=0;player.slideCooldown=0;ai.x=0;ai.z=-10;ai.fireTimer=1.1;ai.strafeTimer=0;reloading=inspecting=false;camera.position.set(0,1.65,10);camera.rotation.set(0,0,0);updateHud();ended=false;playing=true;overlay.classList.add('hidden');renderer.domElement.requestPointerLock?.()}
+startButton.addEventListener('click',startGame);document.addEventListener('pointerlockchange',()=>{if(playing&&document.pointerLockElement!==renderer.domElement){playing=false;overlay.classList.remove('hidden');message.innerHTML='Paused. Click below to resume the duel.';startButton.textContent='RESUME'}});
+document.addEventListener('mousemove',e=>{if(!playing)return;player.yaw-=e.movementX*.0022;player.pitch-=e.movementY*.0022;player.pitch=THREE.MathUtils.clamp(player.pitch,-1.15,1.15);camera.rotation.set(player.pitch,player.yaw,0)});
+function reload(){if(!playing||reloading||player.ammo===12||player.reserve<=0)return;reloading=true;reloadStart=performance.now();inspecting=false;updateHud()}
+function inspect(){if(!playing||reloading)return;inspecting=true;inspectStart=performance.now();updateHud()}
+function startSlide(){if(!playing||player.slideCooldown>0||player.slideTime>0||!keys.shift)return;player.slideTime=.72;player.slideCooldown=1.5}
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if([' ','arrowup','arrowdown'].includes(k))e.preventDefault();if(k==='r')reload();if(k==='t')inspect();if(k==='control'||k==='c')startSlide()});document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});document.addEventListener('mousedown',e=>{if(e.button===0&&playing)shoot()});
+function collides(x,z,r=.38){if(Math.abs(x)>15.8||Math.abs(z)>15.8)return true;return cover.some(c=>Math.abs(x-c.x)<c.sx/2+r&&Math.abs(z-c.z)<c.sz/2+r)}
+function movePlayer(dt){let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0),s=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);const len=Math.hypot(f,s)||1;f/=len;s/=len;const sliding=player.slideTime>0;const running=keys.shift&&!sliding;const speed=sliding?12.5:player.speed*(running?1.55:1);if(running&&(f||s))player.runTime+=dt;else player.runTime=0;
+ let dx=(-Math.sin(player.yaw)*f+Math.cos(player.yaw)*s)*speed*dt,dz=(-Math.cos(player.yaw)*f-Math.sin(player.yaw)*s)*speed*dt;if(sliding){dx+=-Math.sin(player.yaw)*speed*dt*.2;dz+=-Math.cos(player.yaw)*speed*dt*.2;player.slideTime=Math.max(0,player.slideTime-dt)}player.slideCooldown=Math.max(0,player.slideCooldown-dt);if(!collides(player.x+dx,player.z))player.x+=dx;if(!collides(player.x,player.z+dz))player.z+=dz;
+ const bob=running?Math.sin(performance.now()*.018)*.045:Math.sin(performance.now()*.006)*.008;camera.position.set(player.x,sliding?1.05:1.65+bob,player.z)}
+function shoot(){if(!playing||reloading||inspecting||player.ammo<=0){if(player.ammo<=0)reload();return}const now=performance.now();if(now-lastShot<230)return;lastShot=now;player.ammo--;muzzleFlash.visible=true;setTimeout(()=>muzzleFlash.visible=false,55);bolt.position.z=-.43;setTimeout(()=>bolt.position.z=-.49,75);updateHud();raycaster.setFromCamera(new THREE.Vector2(0,0),camera);const hit=raycaster.intersectObjects([torso,...bodyRig.children],true)[0];if(hit&&hit.distance<35&&ai.health>0){ai.health-=hit.object===bodyRig.children[1]?48:34;hitFlash=.12;updateHud();if(ai.health<=0)showEnd('YOU WIN! The rival is down.')}}
+function updateReload(now){if(!reloading)return;const t=(now-reloadStart)/1000;const drop=Math.min(1,t/.22);weapon.rotation.x=-drop*.75;weapon.position.y=-drop*.18;magazine.position.y=-.49-drop*.2;if(t>.75){const needed=12-player.ammo,loaded=Math.min(needed,player.reserve);player.ammo+=loaded;player.reserve-=loaded;reloading=false;weapon.rotation.x=0;weapon.position.y=0;magazine.position.y=-.49;updateHud()}}
+function updateInspect(now){if(!inspecting)return;const t=(now-inspectStart)/1000;if(t>1.55){inspecting=false;weapon.rotation.set(0,0,0);weapon.position.set(0,0,0);updateHud();return}const wave=Math.sin(Math.min(1,t/.25)*Math.PI/2);weapon.rotation.y=wave*.75;weapon.rotation.x=-wave*.22;weapon.position.y=-wave*.1}
+function updateRival(dt){if(ai.health<=0||player.health<=0)return;const dx=player.x-ai.x,dz=player.z-ai.z,dist=Math.hypot(dx,dz)||1;ai.strafeTimer-=dt;if(ai.strafeTimer<=0){ai.strafeTimer=1.4+Math.random()*1.5;ai.strafe=Math.random()<.5?-1:1}let vx=0,vz=0;if(dist>8){vx+=dx/dist;vz+=dz/dist}else if(dist<5.2){vx-=dx/dist;vz-=dz/dist}vx+=(dz/dist)*ai.strafe*.7;vz+=(-dx/dist)*ai.strafe*.7;const vl=Math.hypot(vx,vz)||1,nx=ai.x+vx/vl*2.7*dt,nz=ai.z+vz/vl*2.7*dt;if(!collides(nx,ai.z,.5))ai.x=nx;if(!collides(ai.x,nz,.5))ai.z=nz;rival.position.set(ai.x,0,ai.z);rival.rotation.y=Math.atan2(-dx,-dz);const moving=Math.hypot(vx,vz)>.15;const gait=performance.now()*.009;leftLeg.rotation.x=moving?Math.sin(gait)*.55:0;rightLeg.rotation.x=moving?-Math.sin(gait)*.55:0;leftArm.rotation.x=moving?-Math.sin(gait)*.25:-.35;rightArm.rotation.x=-.48+Math.sin(gait)*.04;bodyRig.rotation.z=moving?Math.sin(gait)*.025:0;
+ ai.fireTimer-=dt;if(ai.fireTimer<=0){ai.fireTimer=.9+Math.random()*.55;const origin=new THREE.Vector3(ai.x,1.45,ai.z),target=new THREE.Vector3(player.x,1.35,player.z),direction=target.clone().sub(origin).normalize();raycaster.set(origin,direction);const blockers=scene.children.filter(o=>o.isMesh&&o!==floor&&o!==grid&&o.parent!==rival);const obstruction=raycaster.intersectObjects(blockers,false)[0];if(dist<19&&(!obstruction||obstruction.distance>dist-.8)){player.health-=dist<8?10:7;hitFlash=.15;updateHud();if(player.health<=0)showEnd('RIVAL WINS. Try another round!')}}}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04),now=performance.now();if(playing&&!ended){movePlayer(dt);updateRival(dt);updateReload(now);updateInspect(now);weapon.position.x=Math.sin(now*(keys.shift?.018:.006))*(keys.shift?.018:.004);if(!reloading&&!inspecting){weapon.rotation.z=player.slideTime>0?.2:0;weapon.position.y+=(player.slideTime>0?-.12:0)-weapon.position.y*.08}updateHud()}if(hitFlash>0){hitFlash-=dt;document.body.style.filter=hitFlash>0?'brightness(1.15)':''}renderer.render(scene,camera)}animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script></body></html>
